@@ -5,9 +5,13 @@ const nextConfig = {
   trailingSlash: false,
   // Server action & body limits
   experimental: {
+    serverComponentsExternalPackages: ['better-sqlite3'],
     serverActions: {
       bodySizeLimit: '4mb',
     },
+  },
+  outputFileTracingIncludes: {
+    '/**': ['./data/**/*'],
   },
   async headers() {
     return [
