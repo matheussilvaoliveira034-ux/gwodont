@@ -4,11 +4,15 @@ import React from 'react';
 import ToothIcon from './ToothIcon';
 import { UserCheck, Award, Zap, Sparkles } from 'lucide-react';
 
-export default function WhyChooseUsSection({ settings }) {
+export default function WhyChooseUsSection({ settings, data = {} }) {
   const whatsappNumber = settings?.whatsapp_raw || '5511975532110';
   const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent('Olá, Dr. Guilad! Vim pelo site da GW Odontologia e gostaria de agendar uma consulta.')}`;
 
-  const cards = [
+  const tag = data?.tag || 'POR QUE NOS ESCOLHER?';
+  const title = data?.title || 'Por que escolher a GW Odontologia em Pinheiros?';
+  const description = data?.subtitle || data?.description || 'Com mais de 30 anos de atuação clínica formada pela Universidade de São Paulo (USP), o Dr. Guilad Weil prioriza a saúde bucal, o diagnóstico rigoroso e o tratamento ético da dor e do bruxismo. Aqui você é atendido diretamente pelo responsável pelo seu caso, em ambiente calmo, seguro e acolhedor.';
+
+  const defaultCards = [
     {
       icon: UserCheck,
       title: 'Atendimento individualizado com Dr. Guilad Weil',
@@ -31,6 +35,12 @@ export default function WhyChooseUsSection({ settings }) {
     },
   ];
 
+  const cards = data?.cards && data.cards.length > 0 ? data.cards.map((c, i) => ({
+    icon: defaultCards[i]?.icon || UserCheck,
+    title: c.title || defaultCards[i]?.title,
+    subtitle: c.subtitle || defaultCards[i]?.subtitle,
+  })) : defaultCards;
+
   return (
     <section className="py-20 sm:py-28 bg-[#f8faff] relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -39,15 +49,15 @@ export default function WhyChooseUsSection({ settings }) {
           {/* Left Column (5 cols): Eyebrow, Title, Description, Model with Badge, CTA */}
           <div className="lg:col-span-5 space-y-6">
             <span className="text-xs font-extrabold tracking-[0.2em] text-slate-500 uppercase block">
-              POR QUE NOS ESCOLHER?
+              {tag}
             </span>
 
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight leading-[1.15]">
-              Por que escolher a GW Odontologia em Pinheiros?
+              {title}
             </h2>
 
             <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
-              Com mais de 30 anos de atuação clínica formada pela Universidade de São Paulo (USP), o Dr. Guilad Weil prioriza a saúde bucal, o diagnóstico rigoroso e o tratamento ético da dor e do bruxismo. Aqui você é atendido diretamente pelo responsável pelo seu caso, em ambiente calmo, seguro e acolhedor.
+              {description}
             </p>
 
             {/* Dental Arch Visual with Floating GW Circular Badge */}

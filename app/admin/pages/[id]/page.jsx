@@ -19,7 +19,10 @@ import {
   HelpCircle, 
   Tag, 
   Link2,
-  Loader2
+  Loader2,
+  Code,
+  Copy,
+  Check
 } from 'lucide-react';
 
 export default function AdminPageEditor({ params }) {
@@ -43,6 +46,44 @@ export default function AdminPageEditor({ params }) {
   const [seoDescription, setSeoDescription] = useState('');
   const [seoKeywords, setSeoKeywords] = useState('');
   const [content, setContent] = useState({});
+  const [jsonText, setJsonText] = useState('');
+  const [jsonError, setJsonError] = useState(null);
+  const [copied, setCopied] = useState(false);
+
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    if (tab === 'advanced') {
+      try {
+        setJsonText(JSON.stringify(content, null, 2));
+        setJsonError(null);
+      } catch (_) {}
+    }
+  };
+
+  const handleJsonChange = (val) => {
+    setJsonText(val);
+    try {
+      const parsed = JSON.parse(val);
+      setContent(parsed);
+      setJsonError(null);
+    } catch (err) {
+      setJsonError(err.message);
+    }
+  };
+
+  const handleFormatJson = () => {
+    try {
+      const parsed = JSON.parse(jsonText);
+      const formatted = JSON.stringify(parsed, null, 2);
+      setJsonText(formatted);
+      setContent(parsed);
+      setJsonError(null);
+      showNotification('success', 'JSON formatado com sucesso!');
+    } catch (err) {
+      setJsonError(err.message);
+      showNotification('error', 'Erro de sintaxe no JSON: ' + err.message);
+    }
+  };
 
   async function loadPage() {
     try {
@@ -65,7 +106,11 @@ export default function AdminPageEditor({ params }) {
         setSeoTitle(activeVersion.seo_title || '');
         setSeoDescription(activeVersion.seo_description || '');
         setSeoKeywords(activeVersion.seo_keywords || '');
-        setContent(activeVersion.content || {});
+        const pageContent = activeVersion.content || {};
+        setContent(pageContent);
+        try {
+          setJsonText(JSON.stringify(pageContent, null, 2));
+        } catch (_) {}
       }
     } catch (e) {
       console.error('Error loading page:', e);
@@ -213,6 +258,61 @@ export default function AdminPageEditor({ params }) {
         [field]: val,
       },
     }));
+  };
+
+  const setSectionField = (section, field, val) => {
+    setContent(prev => ({
+      ...prev,
+      [section]: {
+        ...(prev[section] || {}),
+        [field]: val,
+      },
+    }));
+  };
+
+  const setNestedArrayItem = (section, arrayKey, idx, field, val) => {
+    setContent(prev => {
+      const arr = [...((prev[section] && prev[section][arrayKey]) || [])];
+      if (field) {
+        arr[idx] = { ...arr[idx], [field]: val };
+      } else {
+        arr[idx] = val;
+      }
+      return {
+        ...prev,
+        [section]: {
+          ...(prev[section] || {}),
+          [arrayKey]: arr,
+        },
+      };
+    });
+  };
+
+  const addNestedArrayItem = (section, arrayKey, defaultItem) => {
+    setContent(prev => {
+      const arr = [...((prev[section] && prev[section][arrayKey]) || [])];
+      arr.push(defaultItem);
+      return {
+        ...prev,
+        [section]: {
+          ...(prev[section] || {}),
+          [arrayKey]: arr,
+        },
+      };
+    });
+  };
+
+  const removeNestedArrayItem = (section, arrayKey, idx) => {
+    setContent(prev => {
+      const arr = ((prev[section] && prev[section][arrayKey]) || []).filter((_, i) => i !== idx);
+      return {
+        ...prev,
+        [section]: {
+          ...(prev[section] || {}),
+          [arrayKey]: arr,
+        },
+      };
+    });
   };
 
   // FAQ Handlers
@@ -391,11 +491,11 @@ export default function AdminPageEditor({ params }) {
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-slate-200 space-x-6 text-sm font-semibold">
+      <div className="flex border-b border-slate-200 space-x-6 text-sm font-semibold overflow-x-auto pb-px">
         <button
           type="button"
-          onClick={() => setActiveTab('hero')}
-          className={`pb-3 border-b-2 transition-colors flex items-center space-x-2 ${
+          onClick={() => handleTabChange('hero')}
+          className={`pb-3 border-b-2 whitespace-nowrap transition-colors flex items-center space-x-2 ${
             activeTab === 'hero'
               ? 'border-blue-600 text-blue-600'
               : 'border-transparent text-slate-500 hover:text-slate-800'
@@ -407,8 +507,8 @@ export default function AdminPageEditor({ params }) {
 
         <button
           type="button"
-          onClick={() => setActiveTab('content')}
-          className={`pb-3 border-b-2 transition-colors flex items-center space-x-2 ${
+          onClick={() => handleTabChange('content')}
+          className={`pb-3 border-b-2 whitespace-nowrap transition-colors flex items-center space-x-2 ${
             activeTab === 'content'
               ? 'border-blue-600 text-blue-600'
               : 'border-transparent text-slate-500 hover:text-slate-800'
@@ -420,8 +520,8 @@ export default function AdminPageEditor({ params }) {
 
         <button
           type="button"
-          onClick={() => setActiveTab('faq')}
-          className={`pb-3 border-b-2 transition-colors flex items-center space-x-2 ${
+          onClick={() => handleTabChange('faq')}
+          className={`pb-3 border-b-2 whitespace-nowrap transition-colors flex items-center space-x-2 ${
             activeTab === 'faq'
               ? 'border-blue-600 text-blue-600'
               : 'border-transparent text-slate-500 hover:text-slate-800'
@@ -433,8 +533,8 @@ export default function AdminPageEditor({ params }) {
 
         <button
           type="button"
-          onClick={() => setActiveTab('seo')}
-          className={`pb-3 border-b-2 transition-colors flex items-center space-x-2 ${
+          onClick={() => handleTabChange('seo')}
+          className={`pb-3 border-b-2 whitespace-nowrap transition-colors flex items-center space-x-2 ${
             activeTab === 'seo'
               ? 'border-blue-600 text-blue-600'
               : 'border-transparent text-slate-500 hover:text-slate-800'
@@ -442,6 +542,19 @@ export default function AdminPageEditor({ params }) {
         >
           <Globe className="w-4 h-4" />
           <span>SEO & Metadados</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => handleTabChange('advanced')}
+          className={`pb-3 border-b-2 whitespace-nowrap transition-colors flex items-center space-x-2 ${
+            activeTab === 'advanced'
+              ? 'border-blue-600 text-blue-600'
+              : 'border-transparent text-slate-500 hover:text-slate-800'
+          }`}
+        >
+          <Code className="w-4 h-4" />
+          <span>Editor Avançado (JSON)</span>
         </button>
       </div>
 
@@ -465,16 +578,47 @@ export default function AdminPageEditor({ params }) {
             />
           </div>
 
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                Destaque do Título em Azul (Opcional)
+              </label>
+              <input
+                type="text"
+                value={content.hero?.title_highlight || ''}
+                onChange={(e) => setHeroField('title_highlight', e.target.value)}
+                placeholder="Ex: Tratamento de Bruxismo"
+                className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm font-semibold text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                Restante do Título
+              </label>
+              <input
+                type="text"
+                value={content.hero?.title_rest || ''}
+                onChange={(e) => setHeroField('title_rest', e.target.value)}
+                placeholder="Ex: e Clínica Geral em Pinheiros"
+                className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </div>
+
           <div>
             <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-              Título Principal da Página (H1)
+              Título Completo da Página (H1)
             </label>
             <input
               type="text"
               value={content.hero?.title || ''}
               onChange={(e) => setHeroField('title', e.target.value)}
+              placeholder="Ex: Tratamento de Bruxismo e Clínica Geral em Pinheiros"
               className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
+            <span className="text-[11px] text-slate-400 mt-1 block">
+              Caso preenchido o "Destaque do Título em Azul", ele terá prioridade visual de dois tons na Home.
+            </span>
           </div>
 
           <div>
@@ -520,10 +664,333 @@ export default function AdminPageEditor({ params }) {
 
       {/* Tab 2: Detailed Clinical Texts */}
       {activeTab === 'content' && (
-        <div className="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-6">
-          <h2 className="text-base font-bold text-slate-900 border-b border-slate-100 pb-3">
-            Textos Descritivos e Explicações Clínicas
-          </h2>
+        <div className="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-8">
+          <div className="border-b border-slate-100 pb-3">
+            <h2 className="text-base font-bold text-slate-900">
+              Textos Descritivos, Seções e Procedimentos Clínicos
+            </h2>
+            <p className="text-xs text-slate-500 mt-1">
+              Todos os blocos de texto da página podem ser alterados diretamente nos campos abaixo.
+            </p>
+          </div>
+
+          {/* Section: Avaliação Clínica (Home) */}
+          {content.clinical_evaluation && (
+            <div className="p-5 bg-slate-50 rounded-xl border border-slate-200 space-y-4">
+              <h3 className="font-bold text-sm text-slate-800 flex items-center space-x-2">
+                <span className="w-2 h-2 rounded-full bg-blue-600"></span>
+                <span>Seção: Avaliação Clínica Completa</span>
+              </h3>
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 mb-1">Título Principal</label>
+                <input
+                  type="text"
+                  value={content.clinical_evaluation.title || ''}
+                  onChange={(e) => setSectionField('clinical_evaluation', 'title', e.target.value)}
+                  className="w-full px-3 py-2 bg-white rounded-lg border border-slate-300 text-sm font-semibold"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 mb-1">Descrição / Subtítulo</label>
+                <textarea
+                  rows={3}
+                  value={content.clinical_evaluation.subtitle || ''}
+                  onChange={(e) => setSectionField('clinical_evaluation', 'subtitle', e.target.value)}
+                  className="w-full px-3 py-2 bg-white rounded-lg border border-slate-300 text-sm"
+                ></textarea>
+              </div>
+            </div>
+          )}
+
+          {/* Section: Diagrama Dentário (Home) */}
+          {content.tooth_diagram && (
+            <div className="p-5 bg-slate-50 rounded-xl border border-slate-200 space-y-4">
+              <h3 className="font-bold text-sm text-slate-800 flex items-center space-x-2">
+                <span className="w-2 h-2 rounded-full bg-blue-600"></span>
+                <span>Seção: Diagrama Anatômico Dental</span>
+              </h3>
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 mb-1">Título da Seção</label>
+                <input
+                  type="text"
+                  value={content.tooth_diagram.title || ''}
+                  onChange={(e) => setSectionField('tooth_diagram', 'title', e.target.value)}
+                  className="w-full px-3 py-2 bg-white rounded-lg border border-slate-300 text-sm font-semibold"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 mb-1">Texto Explicativo</label>
+                <textarea
+                  rows={3}
+                  value={content.tooth_diagram.subtitle || ''}
+                  onChange={(e) => setSectionField('tooth_diagram', 'subtitle', e.target.value)}
+                  className="w-full px-3 py-2 bg-white rounded-lg border border-slate-300 text-sm"
+                ></textarea>
+              </div>
+            </div>
+          )}
+
+          {/* Section: Por que nos escolher (Home) */}
+          {content.why_choose_us && (
+            <div className="p-5 bg-slate-50 rounded-xl border border-slate-200 space-y-4">
+              <h3 className="font-bold text-sm text-slate-800 flex items-center space-x-2">
+                <span className="w-2 h-2 rounded-full bg-blue-600"></span>
+                <span>Seção: Por que Escolher a GW Odontologia</span>
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">Etiqueta Superior (Tag)</label>
+                  <input
+                    type="text"
+                    value={content.why_choose_us.tag || ''}
+                    onChange={(e) => setSectionField('why_choose_us', 'tag', e.target.value)}
+                    className="w-full px-3 py-2 bg-white rounded-lg border border-slate-300 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">Título da Seção</label>
+                  <input
+                    type="text"
+                    value={content.why_choose_us.title || ''}
+                    onChange={(e) => setSectionField('why_choose_us', 'title', e.target.value)}
+                    className="w-full px-3 py-2 bg-white rounded-lg border border-slate-300 text-sm font-semibold"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 mb-1">Descrição</label>
+                <textarea
+                  rows={3}
+                  value={content.why_choose_us.subtitle || ''}
+                  onChange={(e) => setSectionField('why_choose_us', 'subtitle', e.target.value)}
+                  className="w-full px-3 py-2 bg-white rounded-lg border border-slate-300 text-sm"
+                ></textarea>
+              </div>
+            </div>
+          )}
+
+          {/* Section: Sobre o Dr. Guilad Weil */}
+          {content.about_doctor && (
+            <div className="p-5 bg-slate-50 rounded-xl border border-slate-200 space-y-5">
+              <h3 className="font-bold text-sm text-slate-800 flex items-center space-x-2">
+                <span className="w-2 h-2 rounded-full bg-blue-600"></span>
+                <span>Seção: Sobre o Cirurgião-Dentista</span>
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">Etiqueta Superior (Tag)</label>
+                  <input
+                    type="text"
+                    value={content.about_doctor.tag || ''}
+                    onChange={(e) => setSectionField('about_doctor', 'tag', e.target.value)}
+                    className="w-full px-3 py-2 bg-white rounded-lg border border-slate-300 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">Título da Seção</label>
+                  <input
+                    type="text"
+                    value={content.about_doctor.title || ''}
+                    onChange={(e) => setSectionField('about_doctor', 'title', e.target.value)}
+                    className="w-full px-3 py-2 bg-white rounded-lg border border-slate-300 text-sm font-semibold"
+                  />
+                </div>
+              </div>
+
+              {/* Parágrafos do Doutor */}
+              <div className="space-y-3 pt-2">
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                    Parágrafos Biográficos
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => addNestedArrayItem('about_doctor', 'paragraphs', 'Novo parágrafo sobre a trajetória do Dr. Guilad.')}
+                    className="text-xs text-blue-600 hover:text-blue-800 font-semibold inline-flex items-center space-x-1"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Adicionar Parágrafo</span>
+                  </button>
+                </div>
+                {content.about_doctor.paragraphs?.map((p, idx) => (
+                  <div key={idx} className="flex items-start space-x-2">
+                    <textarea
+                      rows={3}
+                      value={p}
+                      onChange={(e) => setNestedArrayItem('about_doctor', 'paragraphs', idx, null, e.target.value)}
+                      className="w-full px-3 py-2 bg-white rounded-lg border border-slate-300 text-sm"
+                    ></textarea>
+                    <button
+                      type="button"
+                      onClick={() => removeNestedArrayItem('about_doctor', 'paragraphs', idx)}
+                      className="text-red-500 hover:text-red-700 p-1.5 rounded"
+                      title="Excluir parágrafo"
+                    >
+                      <Trash className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              {/* Credenciais e Destaques */}
+              <div className="space-y-3 pt-2">
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                    Credenciais e Qualificações em Destaque
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => addNestedArrayItem('about_doctor', 'credentials', 'Nova formação ou habilitação')}
+                    className="text-xs text-blue-600 hover:text-blue-800 font-semibold inline-flex items-center space-x-1"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Adicionar Credencial</span>
+                  </button>
+                </div>
+                {content.about_doctor.credentials?.map((c, idx) => (
+                  <div key={idx} className="flex items-center space-x-2">
+                    <input
+                      type="text"
+                      value={c}
+                      onChange={(e) => setNestedArrayItem('about_doctor', 'credentials', idx, null, e.target.value)}
+                      className="w-full px-3 py-1.5 bg-white rounded-lg border border-slate-300 text-xs font-medium"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeNestedArrayItem('about_doctor', 'credentials', idx)}
+                      className="text-red-500 hover:text-red-700 p-1.5 rounded"
+                      title="Excluir credencial"
+                    >
+                      <Trash className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Section: Cards de Serviços e Tratamentos */}
+          {content.services_section && (
+            <div className="p-5 bg-slate-50 rounded-xl border border-slate-200 space-y-4">
+              <h3 className="font-bold text-sm text-slate-800 flex items-center space-x-2">
+                <span className="w-2 h-2 rounded-full bg-blue-600"></span>
+                <span>Seção: Cards de Tratamentos</span>
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">Etiqueta Superior (Tag)</label>
+                  <input
+                    type="text"
+                    value={content.services_section.tag || ''}
+                    onChange={(e) => setSectionField('services_section', 'tag', e.target.value)}
+                    className="w-full px-3 py-2 bg-white rounded-lg border border-slate-300 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">Título da Seção</label>
+                  <input
+                    type="text"
+                    value={content.services_section.title || ''}
+                    onChange={(e) => setSectionField('services_section', 'title', e.target.value)}
+                    className="w-full px-3 py-2 bg-white rounded-lg border border-slate-300 text-sm font-semibold"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 mb-1">Subtítulo</label>
+                <input
+                  type="text"
+                  value={content.services_section.subtitle || ''}
+                  onChange={(e) => setSectionField('services_section', 'subtitle', e.target.value)}
+                  className="w-full px-3 py-2 bg-white rounded-lg border border-slate-300 text-sm"
+                />
+              </div>
+
+              <div className="space-y-3 pt-2">
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                  Cards de Tratamentos Individuais
+                </label>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {content.services_section.cards?.map((card, idx) => (
+                    <div key={idx} className="p-3.5 bg-white rounded-xl border border-slate-200 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-blue-600">{card.slug}</span>
+                        <input
+                          type="text"
+                          value={card.badge || ''}
+                          onChange={(e) => setNestedArrayItem('services_section', 'cards', idx, 'badge', e.target.value)}
+                          placeholder="Etiqueta / Badge"
+                          className="px-2 py-0.5 text-[11px] bg-blue-50 text-blue-700 rounded border border-blue-200"
+                        />
+                      </div>
+                      <input
+                        type="text"
+                        value={card.title}
+                        onChange={(e) => setNestedArrayItem('services_section', 'cards', idx, 'title', e.target.value)}
+                        className="w-full px-2.5 py-1.5 rounded border border-slate-300 text-xs font-bold"
+                        placeholder="Título do card"
+                      />
+                      <textarea
+                        rows={2}
+                        value={card.description}
+                        onChange={(e) => setNestedArrayItem('services_section', 'cards', idx, 'description', e.target.value)}
+                        className="w-full px-2.5 py-1.5 rounded border border-slate-300 text-xs"
+                        placeholder="Descrição do card"
+                      ></textarea>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Section: Diferenciais Clínicos */}
+          {content.differentials && (
+            <div className="p-5 bg-slate-50 rounded-xl border border-slate-200 space-y-4">
+              <h3 className="font-bold text-sm text-slate-800 flex items-center space-x-2">
+                <span className="w-2 h-2 rounded-full bg-blue-600"></span>
+                <span>Seção: Diferenciais Clínicos</span>
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">Etiqueta</label>
+                  <input
+                    type="text"
+                    value={content.differentials.tag || ''}
+                    onChange={(e) => setSectionField('differentials', 'tag', e.target.value)}
+                    className="w-full px-3 py-2 bg-white rounded-lg border border-slate-300 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">Título</label>
+                  <input
+                    type="text"
+                    value={content.differentials.title || ''}
+                    onChange={(e) => setSectionField('differentials', 'title', e.target.value)}
+                    className="w-full px-3 py-2 bg-white rounded-lg border border-slate-300 text-sm font-semibold"
+                  />
+                </div>
+              </div>
+              <div className="space-y-3 pt-2">
+                {content.differentials.items?.map((item, idx) => (
+                  <div key={idx} className="p-3 bg-white rounded-xl border border-slate-200 space-y-1.5">
+                    <input
+                      type="text"
+                      value={item.title}
+                      onChange={(e) => setNestedArrayItem('differentials', 'items', idx, 'title', e.target.value)}
+                      className="w-full px-2.5 py-1 bg-slate-50 font-bold text-xs rounded border border-slate-300"
+                    />
+                    <textarea
+                      rows={2}
+                      value={item.description}
+                      onChange={(e) => setNestedArrayItem('differentials', 'items', idx, 'description', e.target.value)}
+                      className="w-full px-2.5 py-1 text-xs rounded border border-slate-300"
+                    ></textarea>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* If page has understanding_section */}
           {content.understanding_section && (
@@ -761,6 +1228,70 @@ export default function AdminPageEditor({ params }) {
               placeholder="palavra1, palavra2, termo3"
               className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
+          </div>
+        </div>
+      )}
+
+      {/* Tab 5: Advanced JSON Editor */}
+      {activeTab === 'advanced' && (
+        <div className="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+            <div>
+              <h2 className="text-base font-bold text-slate-900 flex items-center space-x-2">
+                <Code className="w-5 h-5 text-blue-600" />
+                <span>Editor Avançado de Conteúdo (JSON Completo)</span>
+              </h2>
+              <p className="text-xs text-slate-500 mt-1">
+                Permite editar, adicionar ou customizar 100% dos dados, textos e estruturas da página diretamente com validação instantânea.
+              </p>
+            </div>
+            <div className="flex items-center space-x-2">
+              <button
+                type="button"
+                onClick={handleFormatJson}
+                className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg transition-colors flex items-center space-x-1"
+              >
+                <Code className="w-3.5 h-3.5" />
+                <span>Formatar / Indentar</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  navigator.clipboard.writeText(jsonText);
+                  setCopied(true);
+                  setTimeout(() => setCopied(false), 2000);
+                }}
+                className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg transition-colors flex items-center space-x-1"
+              >
+                {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                <span>{copied ? 'Copiado!' : 'Copiar JSON'}</span>
+              </button>
+            </div>
+          </div>
+
+          {jsonError ? (
+            <div className="p-3 bg-red-50 border border-red-200 rounded-xl flex items-start space-x-2 text-xs text-red-700">
+              <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <span className="font-bold block">Erro de Sintaxe no JSON:</span>
+                <span className="font-mono">{jsonError}</span>
+              </div>
+            </div>
+          ) : (
+            <div className="p-2.5 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center space-x-2 text-xs text-emerald-700">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+              <span className="font-semibold">JSON Válido e Sincronizado com o sistema.</span>
+            </div>
+          )}
+
+          <div>
+            <textarea
+              rows={24}
+              value={jsonText}
+              onChange={(e) => handleJsonChange(e.target.value)}
+              className="w-full p-4 font-mono text-xs text-emerald-400 bg-slate-950 rounded-xl border border-slate-800 shadow-inner focus:outline-none focus:ring-2 focus:ring-blue-500 leading-relaxed tracking-wide"
+              spellCheck={false}
+            ></textarea>
           </div>
         </div>
       )}

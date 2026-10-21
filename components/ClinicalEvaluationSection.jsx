@@ -4,11 +4,14 @@ import React from 'react';
 import ToothIcon from './ToothIcon';
 import { Check, ShieldCheck, Activity, Zap, ClipboardCheck } from 'lucide-react';
 
-export default function ClinicalEvaluationSection({ settings }) {
+export default function ClinicalEvaluationSection({ settings, data = {} }) {
   const whatsappNumber = settings?.whatsapp_raw || '5511975532110';
   const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent('Olá, Dr. Guilad! Vim pelo site da GW Odontologia e gostaria de agendar uma avaliação clínica.')}`;
 
-  const cards = [
+  const title = data?.title || 'Avaliação Clínica Completa + Planejamento com Total Transparência';
+  const description = data?.subtitle || data?.description || 'Aqui na GW Odontologia, você entende com exatidão a causa do seu desconforto orofacial. O Dr. Guilad Weil realiza exames clínicos criteriosos para que você saiba exatamente como proteger sua saúde mastigatória, sem intervenções desnecessárias.';
+
+  const defaultCards = [
     {
       icon: Activity,
       title: 'Avaliação completa da oclusão e ATM',
@@ -31,6 +34,12 @@ export default function ClinicalEvaluationSection({ settings }) {
     },
   ];
 
+  const cards = data?.cards && data.cards.length > 0 ? data.cards.map((c, i) => ({
+    icon: defaultCards[i]?.icon || Check,
+    title: c.title || defaultCards[i]?.title,
+    description: c.description || defaultCards[i]?.description,
+  })) : defaultCards;
+
   return (
     <section className="py-20 sm:py-28 bg-[#f8faff] relative overflow-hidden">
       {/* Soft background blue ambient glow */}
@@ -41,12 +50,12 @@ export default function ClinicalEvaluationSection({ settings }) {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-end mb-16">
           <div className="lg:col-span-7">
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight leading-[1.15]">
-              Avaliação Clínica Completa + Planejamento com Total Transparência
+              {title}
             </h2>
           </div>
           <div className="lg:col-span-5">
             <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
-              Aqui na <strong className="text-slate-900 font-bold">GW Odontologia</strong>, você entende com exatidão a causa do seu desconforto orofacial. O Dr. Guilad Weil realiza exames clínicos criteriosos para que você saiba exatamente como proteger sua saúde mastigatória, sem intervenções desnecessárias.
+              {description}
             </p>
           </div>
         </div>

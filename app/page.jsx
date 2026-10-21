@@ -99,12 +99,23 @@ export default function HomePage() {
 
               {/* Main Two-Tone Headline */}
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight leading-[1.1]">
-                <span className="text-blue-600 block sm:inline">Tratamento de Bruxismo</span> e Clínica Geral de Alta Precisão
+                {content?.hero?.title_highlight ? (
+                  <>
+                    <span className="text-blue-600 block sm:inline">{content.hero.title_highlight} </span>
+                    {content.hero.title_rest || ''}
+                  </>
+                ) : content?.hero?.title ? (
+                  content.hero.title
+                ) : (
+                  <>
+                    <span className="text-blue-600 block sm:inline">Tratamento de Bruxismo</span> e Clínica Geral em Pinheiros
+                  </>
+                )}
               </h1>
 
               {/* Body Text */}
               <p className="text-base sm:text-lg text-slate-600 leading-relaxed max-w-xl">
-                Na <strong className="text-slate-900 font-bold">GW Odontologia</strong>, você conta com atendimento individualizado do Dr. Guilad Weil (USP, +30 anos de experiência). Foco absoluto na saúde bucal, no alívio de dores orofaciais e na preservação da função mastigatória.
+                {content?.hero?.subtitle || 'Na GW Odontologia, você conta com atendimento individualizado do Dr. Guilad Weil (USP, +30 anos de experiência). Foco absoluto na saúde bucal, no alívio de dores orofaciais e na preservação da função mastigatória.'}
               </p>
 
               {/* Action Pill Button */}
@@ -115,7 +126,7 @@ export default function HomePage() {
                   rel="noopener noreferrer"
                   className="btn-pill-blue flex items-center space-x-2 group w-full sm:w-auto"
                 >
-                  <span>AGENDAR AVALIAÇÃO</span>
+                  <span>{content?.hero?.cta_primary_text || 'AGENDAR AVALIAÇÃO'}</span>
                   <ToothIcon className="w-4 h-4 ml-1 fill-white group-hover:scale-110 transition-transform" />
                 </a>
               </div>
@@ -163,14 +174,14 @@ export default function HomePage() {
       {/* 2. TICKER BAR - Faixa Marquee Contínua no Estilo Odontocenter em Azul Marinho */}
       <MarqueeTicker />
 
-      {/* 3. AVALIAÇÃO CLÍNICA COMPLETA (SCREENSHOT 2: 4 CARDS + CHECKMARK BANNER + BOTÃO) */}
-      <ClinicalEvaluationSection settings={settings} />
+      {/* 3. AVALIAÇÃO CLÍNICA COMPLETA */}
+      <ClinicalEvaluationSection settings={settings} data={content?.clinical_evaluation} />
 
-      {/* 4. DIAGRAMA ANATÔMICO COM O DENTE CENTRAL E LINHAS DE CHAMADA (SCREENSHOT 3) */}
-      <ToothDiagramSection />
+      {/* 4. DIAGRAMA ANATÔMICO COM O DENTE CENTRAL E LINHAS DE CHAMADA */}
+      <ToothDiagramSection data={content?.tooth_diagram} />
 
-      {/* 5. POR QUE ESCOLHER A GW ODONTOLOGIA (SCREENSHOTS 4 & 5: CARDS AZUIS + BADGE GW) */}
-      <WhyChooseUsSection settings={settings} />
+      {/* 5. POR QUE ESCOLHER A GW ODONTOLOGIA */}
+      <WhyChooseUsSection settings={settings} data={content?.why_choose_us} />
 
       {/* 6. PÁGINAS INDEPENDENTES DE TRATAMENTOS */}
       <section className="py-20 sm:py-28 bg-white border-t border-slate-100">

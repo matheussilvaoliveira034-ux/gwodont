@@ -2,17 +2,20 @@
 
 import React from 'react';
 
-export default function ToothDiagramSection() {
+export default function ToothDiagramSection({ data = {} }) {
+  const title = data?.title || 'O que o cuidado odontológico representa para sua vida?';
+  const subtitle = data?.subtitle || 'A saúde dos seus dentes, o alívio das tensões e a preservação mastigatória são os pilares para noites reparadoras, equilíbrio e tranquilidade diária.';
+
   return (
     <section className="py-20 sm:py-28 bg-white relative overflow-hidden">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Centered Heading */}
         <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-14">
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight leading-[1.15] mb-4">
-            O que o cuidado odontológico representa para sua vida?
+            {title}
           </h2>
           <p className="text-base sm:text-lg text-slate-600 leading-relaxed max-w-2xl mx-auto">
-            A saúde dos seus dentes, o alívio das tensões e a preservação mastigatória são os pilares para noites reparadoras, equilíbrio e tranquilidade diária.
+            {subtitle}
           </p>
         </div>
 
