@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { requireAuth } from '../../../../../lib/requireAuth';
 import { getPageForAdmin, savePageDraft, publishPage, discardDraft } from '../../../../../lib/db';
 
@@ -73,6 +74,16 @@ export async function POST(request, { params }) {
 
     if (action === 'publish') {
       publishPage(pageId, user.email);
+      try {
+        revalidatePath('/', 'layout');
+        revalidatePath('/[...slug]', 'page');
+        revalidatePath('/contato', 'page');
+        revalidatePath('/bruxismo', 'page');
+        revalidatePath('/clinica-geral', 'page');
+        revalidatePath('/herpes', 'page');
+      } catch (revErr) {
+        console.warn('Revalidate error:', revErr.message);
+      }
       return NextResponse.json({
         ok: true,
         message: 'Alterações publicadas com sucesso! O site público foi atualizado.',

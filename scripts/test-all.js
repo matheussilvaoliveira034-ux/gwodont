@@ -181,7 +181,7 @@ async function runTests() {
   // TEST SUITE 8: Configurações Globais e Dados de Contato
   console.log('\n--- 8. Dados do Consultório ---');
   const settings = getSettings();
-  assert(settings.phone_fixo === '(11) 3081-3789', 'Telefone fixo confirmado: (11) 3081-3789');
+  assert(!settings.phone_fixo, 'Telefone fixo desativado conforme solicitação do Dr. Guilad (apenas WhatsApp)');
   assert(settings.phone_whatsapp === '(11) 97553-2110', 'WhatsApp confirmado: (11) 97553-2110');
   assert(settings.building === 'Condomínio Atrium', 'Edifício confirmado: Condomínio Atrium');
   assert(settings.address.includes('Cristiano Viana, 401'), 'Endereço confirmado: Rua Cristiano Viana, 401');

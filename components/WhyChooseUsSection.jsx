@@ -60,35 +60,6 @@ export default function WhyChooseUsSection({ settings, data = {} }) {
               {description}
             </p>
 
-            {/* Dental Arch Visual with Floating GW Circular Badge */}
-            <div className="relative py-4 flex items-center justify-center">
-              {/* Dental Arch SVG Model */}
-              <div className="w-64 h-56 bg-gradient-to-b from-blue-50/70 to-blue-100/40 rounded-3xl border border-blue-200/80 p-6 flex items-center justify-center relative shadow-sm">
-                <svg className="w-44 h-40 drop-shadow-md" viewBox="0 0 160 140" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  {/* Gum Arch Base */}
-                  <path
-                    d="M 20 110 C 20 40, 140 40, 140 110 C 130 110, 120 70, 80 70 C 40 70, 30 110, 20 110 Z"
-                    fill="#fecdd3"
-                    stroke="#fda4af"
-                    strokeWidth="2"
-                  />
-                  {/* Anatomical Teeth along Arch */}
-                  <rect x="25" y="90" width="14" height="18" rx="4" fill="#ffffff" stroke="#93c5fd" strokeWidth="1.5" />
-                  <rect x="42" y="70" width="15" height="19" rx="4" fill="#ffffff" stroke="#93c5fd" strokeWidth="1.5" />
-                  <rect x="60" y="55" width="18" height="22" rx="4" fill="#ffffff" stroke="#93c5fd" strokeWidth="1.5" />
-                  <rect x="82" y="55" width="18" height="22" rx="4" fill="#ffffff" stroke="#93c5fd" strokeWidth="1.5" />
-                  <rect x="103" y="70" width="15" height="19" rx="4" fill="#ffffff" stroke="#93c5fd" strokeWidth="1.5" />
-                  <rect x="121" y="90" width="14" height="18" rx="4" fill="#ffffff" stroke="#93c5fd" strokeWidth="1.5" />
-                </svg>
-
-                {/* Floating GW Monogram Circular Badge in Royal Blue */}
-                <div className="absolute -bottom-2 -right-2 sm:right-2 w-24 h-24 rounded-full bg-gradient-to-br from-blue-600 via-blue-700 to-blue-900 text-white flex flex-col items-center justify-center shadow-xl border-4 border-white transform hover:scale-105 transition-transform">
-                  <span className="font-black text-2xl tracking-tight leading-none">GW</span>
-                  <span className="text-[9px] uppercase tracking-wider font-bold opacity-85 mt-0.5">Odonto</span>
-                </div>
-              </div>
-            </div>
-
             {/* Glowing Pill CTA Button */}
             <div className="pt-2">
               <a
@@ -97,7 +68,7 @@ export default function WhyChooseUsSection({ settings, data = {} }) {
                 rel="noopener noreferrer"
                 className="btn-pill-blue flex items-center space-x-2 group w-full sm:w-auto"
               >
-                <span>AGENDAR AVALIAÇÃO</span>
+                <span>AGENDAR CONSULTA</span>
                 <ToothIcon className="w-4 h-4 ml-1 fill-white group-hover:scale-110 transition-transform" />
               </a>
             </div>

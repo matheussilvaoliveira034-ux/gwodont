@@ -9,6 +9,7 @@
     "seed": "node scripts/init-db.js"
   },
   "dependencies": {
+    "@libsql/client": "^0.18.0",
     "autoprefixer": "^10.6.1",
     "bcryptjs": "^3.0.3",
     "better-sqlite3": "^13.0.3",

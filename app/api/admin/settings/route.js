@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { requireAuth } from '../../../../lib/requireAuth';
 import { getSettings, updateSettings } from '../../../../lib/db';
 
@@ -28,6 +29,10 @@ export async function PUT(request) {
   try {
     const body = await request.json();
     updateSettings(body, user.email);
+
+    try {
+      revalidatePath('/', 'layout');
+    } catch (_) {}
 
     return NextResponse.json({
       ok: true,

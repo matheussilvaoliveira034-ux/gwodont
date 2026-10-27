@@ -21,9 +21,6 @@ import {
 } from 'lucide-react';
 import { getPageBySlug, getSettings, getAllReviews } from '../lib/db';
 import ToothIcon from '../components/ToothIcon';
-import MarqueeTicker from '../components/MarqueeTicker';
-import ClinicalEvaluationSection from '../components/ClinicalEvaluationSection';
-import ToothDiagramSection from '../components/ToothDiagramSection';
 import WhyChooseUsSection from '../components/WhyChooseUsSection';
 import FaqAccordion from '../components/FaqAccordion';
 import ContactSection from '../components/ContactSection';
@@ -93,7 +90,7 @@ export default function HomePage() {
               {/* Eyebrow Tag */}
               <div className="inline-block">
                 <span className="text-xs font-extrabold uppercase tracking-[0.25em] text-slate-500">
-                  {content?.hero?.tag || 'CUIDADO ODONTOLÓGICO ESPECIALIZADO EM PINHEIROS'}
+                  {content?.hero?.tag || 'CONSULTÓRIO ODONTOLÓGICO EM PINHEIROS'}
                 </span>
               </div>
 
@@ -108,14 +105,14 @@ export default function HomePage() {
                   content.hero.title
                 ) : (
                   <>
-                    <span className="text-blue-600 block sm:inline">Tratamento de Bruxismo</span> e Clínica Geral em Pinheiros
+                    <span className="text-blue-600 block sm:inline">Odontologia Clínica</span> e Cuidado Geral em Pinheiros
                   </>
                 )}
               </h1>
 
               {/* Body Text */}
               <p className="text-base sm:text-lg text-slate-600 leading-relaxed max-w-xl">
-                {content?.hero?.subtitle || 'Na GW Odontologia, você conta com atendimento individualizado do Dr. Guilad Weil (USP, +30 anos de experiência). Foco absoluto na saúde bucal, no alívio de dores orofaciais e na preservação da função mastigatória.'}
+                {content?.hero?.subtitle || 'Com mais de 30 anos de atuação clínica formada pela Faculdade de Odontologia da USP, o Dr. Guilad Weil oferece atendimento particular e individualizado no bairro de Pinheiros, focado na saúde bucal, diagnóstico criterioso e preservação mastigatória.'}
               </p>
 
               {/* Action Pill Button */}
@@ -126,7 +123,7 @@ export default function HomePage() {
                   rel="noopener noreferrer"
                   className="btn-pill-blue flex items-center space-x-2 group w-full sm:w-auto"
                 >
-                  <span>{content?.hero?.cta_primary_text || 'AGENDAR AVALIAÇÃO'}</span>
+                  <span>{content?.hero?.cta_primary_text || 'AGENDAR CONSULTA'}</span>
                   <ToothIcon className="w-4 h-4 ml-1 fill-white group-hover:scale-110 transition-transform" />
                 </a>
               </div>
@@ -147,7 +144,7 @@ export default function HomePage() {
                 {/* Doctor's Photo Frame */}
                 <div className="relative rounded-3xl overflow-hidden shadow-2xl border-4 border-white bg-slate-100 aspect-[3/4] sm:aspect-[4/5] max-h-[520px] w-full">
                   <img
-                    src="/images/dr-guilad-weil.jpg"
+                    src={content?.hero?.image_url || '/images/dr-guilad-weil.jpg'}
                     alt="Dr. Guilad Weil — Cirurgião-Dentista USP"
                     className="w-full h-full object-cover object-top hover:scale-105 transition-transform duration-700"
                   />
@@ -171,16 +168,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 2. TICKER BAR - Faixa Marquee Contínua no Estilo Odontocenter em Azul Marinho */}
-      <MarqueeTicker />
-
-      {/* 3. AVALIAÇÃO CLÍNICA COMPLETA */}
-      <ClinicalEvaluationSection settings={settings} data={content?.clinical_evaluation} />
-
-      {/* 4. DIAGRAMA ANATÔMICO COM O DENTE CENTRAL E LINHAS DE CHAMADA */}
-      <ToothDiagramSection data={content?.tooth_diagram} />
-
-      {/* 5. POR QUE ESCOLHER A GW ODONTOLOGIA */}
+      {/* 2. POR QUE ESCOLHER A GW ODONTOLOGIA (Clean & Minimalist) */}
       <WhyChooseUsSection settings={settings} data={content?.why_choose_us} />
 
       {/* 6. PÁGINAS INDEPENDENTES DE TRATAMENTOS */}
@@ -245,42 +233,20 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
             
-            {/* Clinical Card Badge & Visual Credential (5 cols) */}
+            {/* Doctor's Portrait Visual (5 cols) */}
             <div className="lg:col-span-5">
-              <div className="bg-white rounded-3xl border border-blue-100 p-8 sm:p-10 shadow-lg shadow-blue-900/5 relative overflow-hidden">
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-blue-800 text-white flex items-center justify-center text-2xl font-black mb-6 shadow-md shadow-blue-500/25">
-                  GW
-                </div>
-                <h3 className="text-2xl sm:text-3xl font-extrabold text-slate-900">Dr. Guilad Weil</h3>
-                <p className="text-sm font-bold text-blue-600 mt-1">Cirurgião-Dentista · USP</p>
-                <p className="text-xs text-slate-500 mt-0.5">Clínica Geral · Diagnóstico & Função Mastigatória</p>
-
-                <div className="mt-6 pt-6 border-t border-slate-100 space-y-3.5">
-                  <div className="flex items-start space-x-3 text-xs sm:text-sm text-slate-700">
-                    <CheckCircle2 className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
-                    <span>Graduação pela Faculdade de Odontologia da Universidade de São Paulo (USP)</span>
+              <div className="relative mx-auto max-w-md lg:max-w-none">
+                <div className="relative rounded-3xl overflow-hidden shadow-xl border-4 border-white bg-slate-100 aspect-[4/5] w-full">
+                  <img
+                    src={content?.about_doctor?.image_url || '/images/dr-guilad-weil.jpg'}
+                    alt="Dr. Guilad Weil — Cirurgião-Dentista formado pela USP"
+                    className="w-full h-full object-cover object-top hover:scale-105 transition-transform duration-700"
+                  />
+                  <div className="absolute bottom-4 left-4 right-4 bg-slate-900/90 backdrop-blur-md rounded-2xl p-4 text-white">
+                    <h3 className="font-extrabold text-base leading-tight">Dr. Guilad Weil</h3>
+                    <p className="text-xs text-blue-300 font-semibold">Cirurgião-Dentista · CRO-SP</p>
+                    <p className="text-[11px] text-slate-300">Graduado pela FOUSP há mais de 30 anos</p>
                   </div>
-                  <div className="flex items-start space-x-3 text-xs sm:text-sm text-slate-700">
-                    <CheckCircle2 className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
-                    <span>Mais de 30 anos de atuação contínua em consultório próprio em Pinheiros</span>
-                  </div>
-                  <div className="flex items-start space-x-3 text-xs sm:text-sm text-slate-700">
-                    <CheckCircle2 className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
-                    <span>Atendimento individualizado em Português, Inglês e Hebraico</span>
-                  </div>
-                  <div className="flex items-start space-x-3 text-xs sm:text-sm text-slate-700">
-                    <CheckCircle2 className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
-                    <span>Colaboração com especialistas para Endodontia e Periodontia</span>
-                  </div>
-                </div>
-
-                <div className="mt-8 pt-6 border-t border-slate-100 text-center">
-                  <span className="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-1">
-                    Local de Atendimento
-                  </span>
-                  <span className="text-sm font-extrabold text-slate-900 block">
-                    Condomínio Atrium · Pinheiros, SP
-                  </span>
                 </div>
               </div>
             </div>

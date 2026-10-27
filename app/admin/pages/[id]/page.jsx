@@ -22,7 +22,9 @@ import {
   Loader2,
   Code,
   Copy,
-  Check
+  Check,
+  Upload,
+  Image as ImageIcon
 } from 'lucide-react';
 
 export default function AdminPageEditor({ params }) {
@@ -49,6 +51,31 @@ export default function AdminPageEditor({ params }) {
   const [jsonText, setJsonText] = useState('');
   const [jsonError, setJsonError] = useState(null);
   const [copied, setCopied] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+
+  const handleImageUpload = async (file, callback) => {
+    if (!file) return;
+    setUploadingImage(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await fetch('/api/admin/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await res.json();
+      if (!res.ok || !data.ok) {
+        showNotification('error', data.error || 'Erro ao carregar imagem.');
+      } else {
+        callback(data.url);
+        showNotification('success', 'Foto atualizada com sucesso!');
+      }
+    } catch (e) {
+      showNotification('error', 'Falha ao enviar imagem.');
+    } finally {
+      setUploadingImage(false);
+    }
+  };
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
@@ -344,7 +371,7 @@ export default function AdminPageEditor({ params }) {
   const hasDraft = !!pageMeta?.draft;
 
   return (
-    <div className="p-6 sm:p-8 space-y-6 max-w-6xl mx-auto">
+    <div className="p-4 sm:p-8 space-y-6 max-w-6xl mx-auto pb-28 sm:pb-32">
       {/* Breadcrumb & Navigation */}
       <div className="flex items-center justify-between">
         <Link
@@ -507,6 +534,19 @@ export default function AdminPageEditor({ params }) {
 
         <button
           type="button"
+          onClick={() => handleTabChange('images')}
+          className={`pb-3 border-b-2 whitespace-nowrap transition-colors flex items-center space-x-2 ${
+            activeTab === 'images'
+              ? 'border-blue-600 text-blue-600'
+              : 'border-transparent text-slate-500 hover:text-slate-800'
+          }`}
+        >
+          <ImageIcon className="w-4 h-4" />
+          <span>Fotos & Mídia</span>
+        </button>
+
+        <button
+          type="button"
           onClick={() => handleTabChange('content')}
           className={`pb-3 border-b-2 whitespace-nowrap transition-colors flex items-center space-x-2 ${
             activeTab === 'content'
@@ -659,6 +699,180 @@ export default function AdminPageEditor({ params }) {
               />
             </div>
           </div>
+
+          {/* Hero Photo Management */}
+          <div className="p-5 bg-slate-50 rounded-xl border border-slate-200 space-y-3 pt-4">
+            <div className="flex items-center justify-between">
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                Foto Principal do Hero (Abertura da Página)
+              </label>
+              <span className="text-[11px] text-slate-500">Visualizada no lado direito do Hero</span>
+            </div>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+              <div className="w-24 h-28 rounded-xl overflow-hidden border-2 border-slate-200 bg-white flex-shrink-0 shadow-sm">
+                <img
+                  src={content.hero?.image_url || '/images/dr-guilad-weil.jpg'}
+                  alt="Preview Hero"
+                  className="w-full h-full object-cover object-top"
+                />
+              </div>
+              <div className="flex-1 space-y-2.5 w-full">
+                <input
+                  type="text"
+                  value={content.hero?.image_url || ''}
+                  onChange={(e) => setHeroField('image_url', e.target.value)}
+                  placeholder="/images/dr-guilad-weil.jpg ou cole uma URL externa"
+                  className="w-full px-3 py-2 bg-white rounded-lg border border-slate-300 text-xs font-mono text-slate-800"
+                />
+                <div className="flex flex-wrap items-center gap-2">
+                  <label className="cursor-pointer inline-flex items-center space-x-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold shadow-sm transition-colors">
+                    <Upload className="w-3.5 h-3.5" />
+                    <span>{uploadingImage ? 'Enviando foto...' : 'Escolher Foto do Computador'}</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        if (e.target.files?.[0]) {
+                          handleImageUpload(e.target.files[0], (url) => setHeroField('image_url', url));
+                        }
+                      }}
+                    />
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setHeroField('image_url', '/images/dr-guilad-weil.jpg')}
+                    className="px-2.5 py-1.5 text-xs text-slate-700 hover:text-slate-900 border border-slate-300 rounded-lg bg-white transition-colors"
+                  >
+                    Usar Foto Oficial do Dr. Guilad
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Tab: Fotos & Mídia */}
+      {activeTab === 'images' && (
+        <div className="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-8">
+          <div className="border-b border-slate-100 pb-3">
+            <h2 className="text-base font-bold text-slate-900 flex items-center space-x-2">
+              <ImageIcon className="w-5 h-5 text-blue-600" />
+              <span>Gerenciamento de Fotos e Imagens da Página</span>
+            </h2>
+            <p className="text-xs text-slate-500 mt-1">
+              Personalize ou substitua as imagens exibidas no site. Você pode enviar arquivos do seu computador ou indicar o link da imagem.
+            </p>
+          </div>
+
+          {/* 1. Foto do Hero */}
+          <div className="p-6 bg-slate-50 rounded-2xl border border-slate-200 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="font-bold text-sm text-slate-900">1. Foto de Abertura (Hero Principal)</h3>
+              <span className="text-xs text-blue-600 font-semibold bg-blue-50 px-2.5 py-1 rounded-full border border-blue-200">
+                Seção Superior
+              </span>
+            </div>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
+              <div className="w-32 h-40 rounded-2xl overflow-hidden border-2 border-slate-300 bg-white flex-shrink-0 shadow-md">
+                <img
+                  src={content.hero?.image_url || '/images/dr-guilad-weil.jpg'}
+                  alt="Preview Hero"
+                  className="w-full h-full object-cover object-top"
+                />
+              </div>
+              <div className="flex-1 space-y-3 w-full">
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                  Endereço ou Caminho da Imagem
+                </label>
+                <input
+                  type="text"
+                  value={content.hero?.image_url || ''}
+                  onChange={(e) => setHeroField('image_url', e.target.value)}
+                  placeholder="/images/dr-guilad-weil.jpg"
+                  className="w-full px-3.5 py-2.5 bg-white rounded-lg border border-slate-300 text-xs font-mono text-slate-800"
+                />
+                <div className="flex flex-wrap items-center gap-2 pt-1">
+                  <label className="cursor-pointer inline-flex items-center space-x-1.5 px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold shadow-sm transition-colors">
+                    <Upload className="w-3.5 h-3.5" />
+                    <span>{uploadingImage ? 'Enviando...' : 'Carregar Nova Foto'}</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        if (e.target.files?.[0]) {
+                          handleImageUpload(e.target.files[0], (url) => setHeroField('image_url', url));
+                        }
+                      }}
+                    />
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setHeroField('image_url', '/images/dr-guilad-weil.jpg')}
+                    className="px-3 py-2 text-xs text-slate-700 hover:text-slate-900 border border-slate-300 rounded-lg bg-white transition-colors"
+                  >
+                    Restaurar Foto Padrão do Dr. Guilad
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 2. Foto da Seção Sobre o Dr. Guilad */}
+          <div className="p-6 bg-slate-50 rounded-2xl border border-slate-200 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="font-bold text-sm text-slate-900">2. Foto da Seção "Sobre o Cirurgião-Dentista"</h3>
+              <span className="text-xs text-blue-600 font-semibold bg-blue-50 px-2.5 py-1 rounded-full border border-blue-200">
+                Seção Biográfica
+              </span>
+            </div>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
+              <div className="w-32 h-40 rounded-2xl overflow-hidden border-2 border-slate-300 bg-white flex-shrink-0 shadow-md">
+                <img
+                  src={content.about_doctor?.image_url || '/images/dr-guilad-weil.jpg'}
+                  alt="Preview Sobre o Doutor"
+                  className="w-full h-full object-cover object-top"
+                />
+              </div>
+              <div className="flex-1 space-y-3 w-full">
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                  Endereço ou Caminho da Imagem
+                </label>
+                <input
+                  type="text"
+                  value={content.about_doctor?.image_url || ''}
+                  onChange={(e) => setSectionField('about_doctor', 'image_url', e.target.value)}
+                  placeholder="/images/dr-guilad-weil.jpg"
+                  className="w-full px-3.5 py-2.5 bg-white rounded-lg border border-slate-300 text-xs font-mono text-slate-800"
+                />
+                <div className="flex flex-wrap items-center gap-2 pt-1">
+                  <label className="cursor-pointer inline-flex items-center space-x-1.5 px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold shadow-sm transition-colors">
+                    <Upload className="w-3.5 h-3.5" />
+                    <span>{uploadingImage ? 'Enviando...' : 'Carregar Nova Foto'}</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        if (e.target.files?.[0]) {
+                          handleImageUpload(e.target.files[0], (url) => setSectionField('about_doctor', 'image_url', url));
+                        }
+                      }}
+                    />
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setSectionField('about_doctor', 'image_url', '/images/dr-guilad-weil.jpg')}
+                    className="px-3 py-2 text-xs text-slate-700 hover:text-slate-900 border border-slate-300 rounded-lg bg-white transition-colors"
+                  >
+                    Restaurar Foto Padrão do Dr. Guilad
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
@@ -794,6 +1008,54 @@ export default function AdminPageEditor({ params }) {
                     onChange={(e) => setSectionField('about_doctor', 'title', e.target.value)}
                     className="w-full px-3 py-2 bg-white rounded-lg border border-slate-300 text-sm font-semibold"
                   />
+                </div>
+              </div>
+
+              {/* Foto do Doutor */}
+              <div className="p-4 bg-white rounded-xl border border-slate-200 space-y-2">
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                  Foto do Dr. Guilad na Seção
+                </label>
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                  <div className="w-20 h-24 rounded-lg overflow-hidden border border-slate-300 bg-slate-50 flex-shrink-0 shadow-sm">
+                    <img
+                      src={content.about_doctor?.image_url || '/images/dr-guilad-weil.jpg'}
+                      alt="Preview Foto"
+                      className="w-full h-full object-cover object-top"
+                    />
+                  </div>
+                  <div className="flex-1 space-y-2 w-full">
+                    <input
+                      type="text"
+                      value={content.about_doctor?.image_url || ''}
+                      onChange={(e) => setSectionField('about_doctor', 'image_url', e.target.value)}
+                      placeholder="/images/dr-guilad-weil.jpg ou cole uma URL"
+                      className="w-full px-3 py-2 bg-slate-50 rounded-lg border border-slate-300 text-xs font-mono text-slate-800"
+                    />
+                    <div className="flex flex-wrap items-center gap-2">
+                      <label className="cursor-pointer inline-flex items-center space-x-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-lg text-xs font-semibold transition-colors">
+                        <Upload className="w-3.5 h-3.5" />
+                        <span>{uploadingImage ? 'Enviando...' : 'Carregar Nova Foto'}</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            if (e.target.files?.[0]) {
+                              handleImageUpload(e.target.files[0], (url) => setSectionField('about_doctor', 'image_url', url));
+                            }
+                          }}
+                        />
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => setSectionField('about_doctor', 'image_url', '/images/dr-guilad-weil.jpg')}
+                        className="px-2.5 py-1.5 text-xs text-slate-600 hover:text-slate-900 border border-slate-200 rounded-lg bg-white"
+                      >
+                        Foto Oficial Padrão
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -1297,23 +1559,25 @@ export default function AdminPageEditor({ params }) {
       )}
 
       {/* Floating Bottom Bar for Fast Actions */}
-      <div className="sticky bottom-6 z-30 bg-slate-900 text-white p-4 rounded-2xl shadow-2xl flex items-center justify-between border border-slate-800">
-        <div className="flex items-center space-x-3 text-xs">
-          <span className="text-slate-400 hidden sm:inline">Página:</span>
-          <span className="font-bold text-white truncate max-w-xs">{pageMeta?.name}</span>
+      <div className="sticky bottom-4 sm:bottom-6 z-30 bg-slate-900/95 backdrop-blur-md text-white p-3.5 sm:p-4 rounded-2xl shadow-2xl flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 border border-slate-800">
+        <div className="flex items-center justify-between sm:justify-start space-x-3 text-xs">
+          <div className="flex items-center space-x-2">
+            <span className="text-slate-400">Página:</span>
+            <span className="font-bold text-white truncate max-w-[180px] sm:max-w-xs">{pageMeta?.name}</span>
+          </div>
           {hasDraft && (
-            <span className="text-[10px] bg-amber-500 text-slate-950 font-bold px-2 py-0.5 rounded-full">
-              Rascunho não publicado
+            <span className="text-[10px] bg-amber-500 text-slate-950 font-bold px-2 py-0.5 rounded-full whitespace-nowrap">
+              Rascunho pendente
             </span>
           )}
         </div>
 
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-2 w-full sm:w-auto">
           <button
             type="button"
             onClick={handleSaveDraft}
             disabled={saving}
-            className="px-3.5 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold transition-colors disabled:opacity-50"
+            className="flex-1 sm:flex-none text-center px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold transition-colors disabled:opacity-50"
           >
             {saving ? 'Salvando...' : 'Salvar Rascunho'}
           </button>
@@ -1321,7 +1585,7 @@ export default function AdminPageEditor({ params }) {
             type="button"
             onClick={handlePublish}
             disabled={publishing}
-            className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold transition-colors shadow disabled:opacity-50"
+            className="flex-1 sm:flex-none text-center px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition-colors shadow-lg shadow-blue-600/30 disabled:opacity-50"
           >
             {publishing ? 'Publicando...' : 'Publicar Alterações'}
           </button>

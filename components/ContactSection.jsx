@@ -37,42 +37,25 @@ export default function ContactSection({ settings }) {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* Left Column: Contact Cards & Directions (7 cols) */}
           <div className="lg:col-span-7 space-y-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4">
               {/* WhatsApp Card */}
-              <div className="p-6 rounded-xl border border-brand-border bg-brand-surface shadow-card-subtle flex flex-col justify-between">
+              <div className="p-6 rounded-2xl border border-brand-border bg-emerald-50/50 shadow-card-subtle flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center text-green-700 mb-3">
-                    <MessageCircle className="w-5 h-5 text-brand-whatsapp" />
+                  <div className="w-12 h-12 rounded-xl bg-emerald-500 text-white flex items-center justify-center mb-3 shadow-md shadow-emerald-500/20">
+                    <MessageCircle className="w-6 h-6" />
                   </div>
-                  <h3 className="text-base font-bold text-brand-navy">WhatsApp</h3>
-                  <p className="text-xs text-brand-text-muted mt-1">Contato direto e rápido para agendamentos</p>
-                  <p className="text-lg font-bold text-brand-navy mt-2">{settings?.phone_whatsapp || '(11) 97553-2110'}</p>
+                  <h3 className="text-lg font-bold text-slate-900">Agendamentos & Dúvidas via WhatsApp</h3>
+                  <p className="text-xs text-slate-600 mt-1">Atendimento particular individualizado com o Dr. Guilad Weil.</p>
+                  <p className="text-xl font-extrabold text-emerald-700 mt-2">{settings?.phone_whatsapp || '(11) 97553-2110'}</p>
                 </div>
                 <a
                   href={whatsappUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="mt-4 inline-flex items-center text-xs font-semibold text-brand-blue hover:text-brand-navy"
+                  className="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md transition-all self-start sm:self-center"
                 >
-                  Iniciar conversa no WhatsApp →
-                </a>
-              </div>
-
-              {/* Fixo Card */}
-              <div className="p-6 rounded-xl border border-brand-border bg-brand-surface shadow-card-subtle flex flex-col justify-between">
-                <div>
-                  <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center text-brand-blue mb-3">
-                    <Phone className="w-5 h-5" />
-                  </div>
-                  <h3 className="text-base font-bold text-brand-navy">Telefone Fixo</h3>
-                  <p className="text-xs text-brand-text-muted mt-1">Atendimento durante o horário comercial</p>
-                  <p className="text-lg font-bold text-brand-navy mt-2">{settings?.phone_fixo || '(11) 3081-3789'}</p>
-                </div>
-                <a
-                  href={`tel:${settings?.phone_fixo?.replace(/[^0-9]/g, '') || '1130813789'}`}
-                  className="mt-4 inline-flex items-center text-xs font-semibold text-brand-blue hover:text-brand-navy"
-                >
-                  Ligar para o consultório →
+                  <MessageCircle className="w-4 h-4 mr-2" />
+                  <span>Conversar no WhatsApp</span>
                 </a>
               </div>
             </div>

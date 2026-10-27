@@ -90,19 +90,10 @@ export default function Footer({ settings }) {
             </h4>
             <div className="space-y-3 text-sm">
               <div className="flex items-start">
-                <Phone className="w-4 h-4 mr-2.5 text-brand-blue-light flex-shrink-0 mt-0.5" />
+                <MessageCircle className="w-4 h-4 mr-2.5 text-emerald-400 flex-shrink-0 mt-0.5" />
                 <div>
-                  <span className="block text-xs text-slate-400">Telefone Fixo:</span>
-                  <a href={`tel:${settings?.phone_fixo?.replace(/[^0-9]/g, '') || '1130813789'}`} className="hover:text-white font-medium">
-                    {settings?.phone_fixo || '(11) 3081-3789'}
-                  </a>
-                </div>
-              </div>
-              <div className="flex items-start">
-                <MessageCircle className="w-4 h-4 mr-2.5 text-brand-whatsapp flex-shrink-0 mt-0.5" />
-                <div>
-                  <span className="block text-xs text-slate-400">WhatsApp:</span>
-                  <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="hover:text-white font-medium">
+                  <span className="block text-xs text-slate-400">WhatsApp (Agendamentos e Dúvidas):</span>
+                  <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="hover:text-emerald-400 font-bold text-white transition-colors">
                     {settings?.phone_whatsapp || '(11) 97553-2110'}
                   </a>
                 </div>

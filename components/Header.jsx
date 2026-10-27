@@ -48,10 +48,15 @@ export default function Header({ settings }) {
               <MapPin className="w-3.5 h-3.5 mr-1.5 text-brand-blue-light" />
               Rua Cristiano Viana, 401, Cj 1311 — Pinheiros, São Paulo
             </span>
-            <span className="flex items-center text-slate-200">
-              <Phone className="w-3.5 h-3.5 mr-1.5 text-brand-blue-light" />
-              Tel: {settings?.phone_fixo || '(11) 3081-3789'}
-            </span>
+            <a
+              href={whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center text-slate-200 hover:text-white transition-colors"
+            >
+              <MessageCircle className="w-3.5 h-3.5 mr-1.5 text-emerald-400" />
+              WhatsApp: {settings?.phone_whatsapp || '(11) 97553-2110'}
+            </a>
           </div>
           <div className="flex items-center space-x-4">
             <span className="text-slate-300 font-medium">Seg a Sex: 8h30 - 18h | Sáb: 9h - 12h</span>
@@ -159,17 +164,10 @@ export default function Header({ settings }) {
                 href={whatsappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full flex items-center justify-center px-4 py-3 rounded-lg bg-brand-navy text-white text-base font-semibold shadow"
+                className="w-full flex items-center justify-center px-4 py-3 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-base font-semibold shadow transition-colors"
               >
-                <MessageCircle className="w-5 h-5 mr-2 text-brand-whatsapp" />
+                <MessageCircle className="w-5 h-5 mr-2 text-white" />
                 Agendar pelo WhatsApp
-              </a>
-              <a
-                href={`tel:${settings?.phone_fixo?.replace(/[^0-9]/g, '') || '1130813789'}`}
-                className="w-full flex items-center justify-center px-4 py-2.5 rounded-lg border border-slate-200 text-slate-700 text-sm font-medium hover:bg-slate-50"
-              >
-                <Phone className="w-4 h-4 mr-2 text-slate-500" />
-                Ligar: {settings?.phone_fixo || '(11) 3081-3789'}
               </a>
             </div>
           </div>
